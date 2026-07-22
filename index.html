@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Australian Psychology & Mental Health News</title>
+<title>Australian Psychology &amp; Mental Health News</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff; padding: 16px; }
@@ -16,64 +16,21 @@ h2 { font-size: 22px; font-weight: 600; color: #3C3C3C; text-align: center; marg
 .title { font-size: 14px; font-weight: 600; color: #3C3C3C; line-height: 1.35; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .meta { font-size: 11px; color: #999; }
 .source { color: #8AC642; font-weight: 500; }
-#loading { text-align: center; padding: 40px; color: #666; }
-#error { display: none; text-align: center; padding: 40px; color: #999; }
-#error a { color: #8AC642; font-weight: 500; }
 #updated { text-align: center; font-size: 11px; color: #bbb; margin-top: 14px; }
 </style>
 </head>
 <body>
 <h2>Australian Psychology &amp; Mental Health News</h2>
-<div id="loading">Loading news…</div>
-<div id="error"></div>
-<div id="news-items" style="display:none"></div>
-<div id="updated"></div>
-<script>
-(function () {
-  var QUERY = 'australian mental health OR psychology OR wellbeing OR psychologist';
-  var GNEWS = 'https://news.google.com/rss/search?q=' + encodeURIComponent(QUERY) + '&hl=en-AU&gl=AU&ceid=AU:en';
-  var MAX = 8, KEY = 'mh_news_cache_v3';
-  var itemsEl = document.getElementById('news-items'),
-      loadingEl = document.getElementById('loading'),
-      errorEl = document.getElementById('error'),
-      updatedEl = document.getElementById('updated');
-
-  function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-  function fmt(d){ if(!d) return ''; var t=new Date(d); return isNaN(t)?'':t.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}); }
-
-  function render(items, updated){
-    if(!items || !items.length) return false;
-    itemsEl.innerHTML = items.slice(0,MAX).map(function(it){
-      var date = fmt(it.date);
-      return '<a class="card" href="'+encodeURI(it.link||'#')+'" target="_blank" rel="noopener"><div class="info">' +
-             '<div class="title">'+esc(it.title)+'</div>' +
-             '<div class="meta"><span class="source">'+esc(it.source)+'</span>'+(date?' &middot; '+date:'')+'</div>' +
-             '</div></a>';
-    }).join('');
-    loadingEl.style.display='none'; errorEl.style.display='none'; itemsEl.style.display='grid';
-    if(updated){ var u=new Date(updated); if(!isNaN(u)) updatedEl.textContent='Updated '+u.toLocaleDateString('en-AU',{day:'numeric',month:'short'})+' '+u.toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}); }
-    return true;
-  }
-  function showError(){
-    loadingEl.style.display='none';
-    if(itemsEl.children.length===0){
-      errorEl.innerHTML='Latest headlines are updating. <a href="'+GNEWS+'" target="_blank" rel="noopener">Open Australian mental-health news &rarr;</a>';
-      errorEl.style.display='block';
-    }
-  }
-
-  // Instant paint from last good copy, so the panel is never blank or stuck.
-  try { var c=JSON.parse(localStorage.getItem(KEY)||'null'); if(c&&c.items) render(c.items, c.updated); } catch(e){}
-
-  // Refresh from the static file the GitHub Action keeps up to date (same origin — no CORS, no proxy).
-  fetch('./news.json?ts=' + Date.now(), { cache:'no-store' })
-    .then(function(r){ if(!r.ok) throw 0; return r.json(); })
-    .then(function(d){
-      if(render(d.items, d.updated)){ try{ localStorage.setItem(KEY, JSON.stringify(d)); }catch(e){} }
-      else showError();
-    })
-    .catch(function(){ if(itemsEl.children.length===0) showError(); });
-})();
-</script>
+<div id="news-items">
+    <a class="card" href="https://news.google.com/rss/articles/CBMirwFBVV95cUxPMGZQLWZadUc2U3VPRkV1a05QMmVFaTNpWlNrQjBRS1RMSUdRZ0dja0s3YkJBSEdjdFVxS3I5Q05yZHcwV29UME1mUndMV3RLRGYyT0h4cHo1TTVFSU8xRnV2RHctRmpjekRFdjNDU3lvWFNZMGRrWVdsNi1ERjVmUm5ZN0tMbzRlZkhsV2ZwaTJ6Wmd4dkJRZG56bE5CZjQ0Q1ZNdFEySmI3T0VCU2sw?oc=5" target="_blank" rel="noopener"><div class="info"><div class="title">NSW has Australia’s worst child psychiatrist shortage</div><div class="meta"><span class="source">SMH.com.au</span> &middot; 22 July 2026</div></div></a>
+    <a class="card" href="https://news.google.com/rss/articles/CBMixAFBVV95cUxORTFrS0E5RGdycnlsYjMxVDFhZTRBQnlNQ3VQSi1aVDlEN1ZNNnZiYTgyZUZSeDh2clFRemdvbk9YNkRkMmxvcW1uNGNzV1hDRExmM3hPX2xZVG00bTFOX2hQSEpaZmZTSDlaS2lXUWlUYzNqWk82QTBKNHFOakN5dFV4UEg3QjVQMGpJVHlzNEktcGNqOWlsSUVsaDNCZ2l6ZHhEMkkzenB0cXJLcHU0Y0s3N242a2FwekdENzNGdUQzVE1K?oc=5" target="_blank" rel="noopener"><div class="info"><div class="title">Extreme high temperatures double young people’s risk of mental health admissions, Australian research shows</div><div class="meta"><span class="source">The Guardian</span> &middot; 6 July 2026</div></div></a>
+    <a class="card" href="https://news.google.com/rss/articles/CBMi2wFBVV95cUxNNnFXVWhmZ3BkWlI5eVAteWRValIwSTAtSXF3MWlKREdWc3A3Q2p2S3Z0X1BxM196OG5rd05Wd20zV2F1dzZWSS1famExUUhUN1UxSFRKS3R6dFNXbTFGeHh2SXAwby1wQklneFZ3Nl9aa3FzMl9VVTJ1enlwb0NCUEN6Y1ZvMUxMelUwdnJOM0FoRTZ1OHVONlc5WjhCV1Q4MnlXNzRQbi00YU5lYm5ESU9qVG9idWlMWDBiOTJ5RFhmQVFQbkw2dXRzbVluM2h5RzVoRk1XV2tiV3M?oc=5" target="_blank" rel="noopener"><div class="info"><div class="title">Mental illness is up in young people, dementia is now the biggest killer: Australia’s health in 2026</div><div class="meta"><span class="source">UNSW Sydney</span> &middot; 8 July 2026</div></div></a>
+    <a class="card" href="https://news.google.com/rss/articles/CBMi1AFBVV95cUxNaEIxQ1ByeS1NczJ6cFhpeFJ4SFVROUtyNjNPVnRaZ05icm9Nem81WkUyOXpvc1d3WXpZbXRTT3cxY3h6dzhfQm9WMlFndGhxOW5uNVVNdXZEX3YtZ1pJSmMxNDNUNktNV1dfbXM4aXNzYUlOQ09rcG1ZdEpSYkk3WFFYa2VMYVpCOGxCMEtRQ2djLUNYcWV0azVVa1NVellsSC1SRl9tSXdreXVqUlhqY0FweEQ3OWhORGdtczFwRWtONjVoYWVKTzI2YWlVNmt2cEp5Rw?oc=5" target="_blank" rel="noopener"><div class="info"><div class="title">Regional communities set to benefit from Mental Health boost</div><div class="meta"><span class="source">Australian Government Department of Health, Disability and Ageing</span> &middot; 7 July 2026</div></div></a>
+    <a class="card" href="https://news.google.com/rss/articles/CBMiywFBVV95cUxNdzdDYWcwRUZZWVg1amxPLTU2Wmg2NGYzMWppUmR2TjNDd0VrdDBWR3ZGV2NWU1dqSmIycXdtMnVoa2Y4MDYzZnZ6c3dRVDdTM3pKaDFUcFQ0UnFLWlVOeFRudUN1emozd2dDeXJRdjkxMTluT3JhNUI4dkp0SHowYnRaZWhCYnU5WDczRHM3Sk9XcC1CeXJVVXdQSmNCS0RWSXkwZmJBeTA1NWV6YTBKODFUQUNpdFFQYnNpckFKXy0weXVBRDh1VEJwNA?oc=5" target="_blank" rel="noopener"><div class="info"><div class="title">Income replacement alone won't fix mental health claims - EML</div><div class="meta"><span class="source">Insurance Business</span> &middot; 20 July 2026</div></div></a>
+    <a class="card" href="https://news.google.com/rss/articles/CBMizAFBVV95cUxNTzdYUjFWMnZTcDk4NTZjZHk1bVZwMVY4eEdpR0o1a1JST3duTVJBLUJlbXBSQnJyRE5Cc3NHeGRYUzkyczBRSTlHQnlVUDYtbWY4Nk1mZXNPTmNrZy0tVFFULWZ2cWxLdUNYNFJWbV91Zml1Yl9sTWpiOWUyTW1aUXpyZl93Q1FEUXQ2YzJ2VHpDSzQyOXlHQzdLcXlPRVJfM1hCOWwxZkJwaGt6TnBfUmtKU2hlWTRTcEdza050VF94Wkp1a2MtWHk5NTI?oc=5" target="_blank" rel="noopener"><div class="info"><div class="title">Asia-Pacific Roundup: TGA seeks feedback on Australian regulations for digital mental health tools</div><div class="meta"><span class="source">RAPS</span> &middot; 20 July 2026</div></div></a>
+    <a class="card" href="https://news.google.com/rss/articles/CBMirAFBVV95cUxQREY4blpBOUlTMUE1Z0MzR0o0Mk9OVXMxbDE1VG9tdnFKRG5QWWwxZHBrT05uTkdwQzlzcGI3TFlXbHY4cFUxbEJYYkdhM0Ryc0sybVlYSUJrQ19YMUVmOHU4V1JwNUFZWDFDWU15bXZielExeVdMQzVPOVJkX05QYmpQUEhVX0RHVDBzazQwR1cweXdWMGZfeERrbFFIam1xZk1ETzVQR1VUdEhH?oc=5" target="_blank" rel="noopener"><div class="info"><div class="title">Psychologist shortfall to hit 96% by 2038 as sector urges government action</div><div class="meta"><span class="source">Macquarie University</span> &middot; 26 May 2026</div></div></a>
+    <a class="card" href="https://news.google.com/rss/articles/CBMi0wFBVV95cUxNQmFyRV92bHVfNjNMeEtpVFVaOEpsbnROTUFJb05wbWxuQ1BETzRKX295VVJob3B3NFRhbkZMR0NscVF1QzVoZ1ZRRGttdnhEVkRQMkxycUhaVElBdWFEUGMzQ3ptZ3IxaXdUd1hkZ19rY2libTkwZWlyaUhEVHo0UGU4VENXYzZvOGU5NzhjVTdqLUNGOHV3VXA3UTE1enpsamVHSmY4N1Jlc1F0U2t2NzlTazBZX0htRDJaZENENGdKZE9IWkl3S19xTjZaTUxYNUE4?oc=5" target="_blank" rel="noopener"><div class="info"><div class="title">The first three years matter more than you think – and Australia's mental health future depends on it</div><div class="meta"><span class="source">InSight+</span> &middot; 22 June 2026</div></div></a>
+</div>
+<div id="updated">Updated 22 July 2026, 09:45 am</div>
 </body>
 </html>
