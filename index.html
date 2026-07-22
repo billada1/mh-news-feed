@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Australian Psychology &amp; Mental Health News</title>
+<title>Australian Psychology & Mental Health News</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff; padding: 16px; }
@@ -12,123 +12,67 @@ h2 { font-size: 22px; font-weight: 600; color: #3C3C3C; text-align: center; marg
 @media (max-width: 700px) { #news-items { grid-template-columns: 1fr; } }
 .card { display: flex; gap: 12px; padding: 14px; border-radius: 8px; text-decoration: none; color: inherit; border: 1px solid #e8e8e8; transition: box-shadow 0.2s, border-color 0.2s; background: #fff; }
 .card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-color: #8AC642; }
-.thumb { flex-shrink: 0; width: 80px; height: 80px; border-radius: 6px; overflow: hidden; background: #f0f0f0; }
-.thumb img { width: 100%; height: 100%; object-fit: cover; }
 .info { flex: 1; min-width: 0; }
-.title { font-size: 14px; font-weight: 600; color: #3C3C3C; line-height: 1.35; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.desc { font-size: 12px; color: #777; line-height: 1.4; margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.title { font-size: 14px; font-weight: 600; color: #3C3C3C; line-height: 1.35; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .meta { font-size: 11px; color: #999; }
 .source { color: #8AC642; font-weight: 500; }
 #loading { text-align: center; padding: 40px; color: #666; }
 #error { display: none; text-align: center; padding: 40px; color: #999; }
-#error a { color: #8AC642; }
+#error a { color: #8AC642; font-weight: 500; }
+#updated { text-align: center; font-size: 11px; color: #bbb; margin-top: 14px; }
 </style>
 </head>
 <body>
 <h2>Australian Psychology &amp; Mental Health News</h2>
-<div id="news-items"></div>
-<div id="loading">Loading news...</div>
-<div id="error">
-  <p>Unable to load news feed. <a href="https://news.google.com/search?q=australian%20mental%20health%20psychology&hl=en-AU&gl=AU" target="_blank" rel="noopener">View on Google News</a></p>
-</div>
+<div id="loading">Loading news…</div>
+<div id="error"></div>
+<div id="news-items" style="display:none"></div>
+<div id="updated"></div>
 <script>
-(function(){
-  var feeds = [
-    'https://news.google.com/rss/search?q=australian+mental+health+OR+psychology+OR+wellbeing+OR+psychologist&hl=en-AU&gl=AU&ceid=AU:en',
-    'https://news.google.com/rss/search?q=mental+health+australia+therapy+OR+counselling+OR+anxiety+OR+depression&hl=en-AU&gl=AU&ceid=AU:en'
-  ];
-  var apiBase = 'https://api.rss2json.com/v1/api.json?rss_url=';
-  var container = document.getElementById('news-items');
-  var loading = document.getElementById('loading');
-  var errorDiv = document.getElementById('error');
-  var allItems = [];
+(function () {
+  var QUERY = 'australian mental health OR psychology OR wellbeing OR psychologist';
+  var GNEWS = 'https://news.google.com/rss/search?q=' + encodeURIComponent(QUERY) + '&hl=en-AU&gl=AU&ceid=AU:en';
+  var MAX = 8, KEY = 'mh_news_cache_v3';
+  var itemsEl = document.getElementById('news-items'),
+      loadingEl = document.getElementById('loading'),
+      errorEl = document.getElementById('error'),
+      updatedEl = document.getElementById('updated');
 
-  function formatDate(dateStr) {
-    try {
-      var d = new Date(dateStr);
-      var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
-    } catch(e) { return dateStr; }
+  function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function fmt(d){ if(!d) return ''; var t=new Date(d); return isNaN(t)?'':t.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}); }
+
+  function render(items, updated){
+    if(!items || !items.length) return false;
+    itemsEl.innerHTML = items.slice(0,MAX).map(function(it){
+      var date = fmt(it.date);
+      return '<a class="card" href="'+encodeURI(it.link||'#')+'" target="_blank" rel="noopener"><div class="info">' +
+             '<div class="title">'+esc(it.title)+'</div>' +
+             '<div class="meta"><span class="source">'+esc(it.source)+'</span>'+(date?' &middot; '+date:'')+'</div>' +
+             '</div></a>';
+    }).join('');
+    loadingEl.style.display='none'; errorEl.style.display='none'; itemsEl.style.display='grid';
+    if(updated){ var u=new Date(updated); if(!isNaN(u)) updatedEl.textContent='Updated '+u.toLocaleDateString('en-AU',{day:'numeric',month:'short'})+' '+u.toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}); }
+    return true;
   }
-
-  function extractSource(title) {
-    var parts = title.split(' - ');
-    if (parts.length > 1) return parts[parts.length - 1].trim();
-    return '';
-  }
-
-  function cleanTitle(title) {
-    var parts = title.split(' - ');
-    if (parts.length > 1) parts.pop();
-    return parts.join(' - ').trim();
-  }
-
-  function stripHtml(html) {
-    var tmp = document.createElement('div');
-    tmp.innerHTML = html;
-    return tmp.textContent || tmp.innerText || '';
-  }
-
-  function renderItems() {
-    var seen = {};
-    var unique = [];
-    allItems.forEach(function(item) {
-      var key = cleanTitle(item.title).toLowerCase().substring(0, 60);
-      if (!seen[key]) {
-        seen[key] = true;
-        unique.push(item);
-      }
-    });
-    unique.sort(function(a, b) {
-      return new Date(b.pubDate) - new Date(a.pubDate);
-    });
-    var items = unique.slice(0, 8);
-    if (items.length === 0) {
-      loading.style.display = 'none';
-      errorDiv.style.display = 'block';
-      return;
+  function showError(){
+    loadingEl.style.display='none';
+    if(itemsEl.children.length===0){
+      errorEl.innerHTML='Latest headlines are updating. <a href="'+GNEWS+'" target="_blank" rel="noopener">Open Australian mental-health news &rarr;</a>';
+      errorEl.style.display='block';
     }
-    var html = '';
-    items.forEach(function(item) {
-      var source = extractSource(item.title);
-      var title = cleanTitle(item.title);
-      var date = formatDate(item.pubDate);
-      var desc = stripHtml(item.description || '').substring(0, 120);
-      if (desc.length >= 120) desc += '...';
-      var thumb = item.thumbnail || (item.enclosure && item.enclosure.link) || '';
-      html += '<a href="' + item.link + '" target="_blank" rel="noopener" class="card">';
-      if (thumb) {
-        html += '<div class="thumb"><img src="' + thumb + '" alt="" onerror="this.parentElement.style.display=\'none\'"></div>';
-      }
-      html += '<div class="info">' +
-        '<div class="title">' + title + '</div>';
-      if (desc) {
-        html += '<div class="desc">' + desc + '</div>';
-      }
-      html += '<div class="meta">';
-      if (source) html += '<span class="source">' + source + '</span> &middot; ';
-      html += date + '</div></div></a>';
-    });
-    container.innerHTML = html;
-    loading.style.display = 'none';
   }
 
-  var completed = 0;
-  feeds.forEach(function(feedUrl) {
-    fetch(apiBase + encodeURIComponent(feedUrl) + '&count=10')
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        if (data.status === 'ok' && data.items) {
-          allItems = allItems.concat(data.items);
-        }
-        completed++;
-        if (completed >= feeds.length) renderItems();
-      })
-      .catch(function() {
-        completed++;
-        if (completed >= feeds.length) renderItems();
-      });
-  });
+  // Instant paint from last good copy, so the panel is never blank or stuck.
+  try { var c=JSON.parse(localStorage.getItem(KEY)||'null'); if(c&&c.items) render(c.items, c.updated); } catch(e){}
+
+  // Refresh from the static file the GitHub Action keeps up to date (same origin — no CORS, no proxy).
+  fetch('./news.json?ts=' + Date.now(), { cache:'no-store' })
+    .then(function(r){ if(!r.ok) throw 0; return r.json(); })
+    .then(function(d){
+      if(render(d.items, d.updated)){ try{ localStorage.setItem(KEY, JSON.stringify(d)); }catch(e){} }
+      else showError();
+    })
+    .catch(function(){ if(itemsEl.children.length===0) showError(); });
 })();
 </script>
 </body>
